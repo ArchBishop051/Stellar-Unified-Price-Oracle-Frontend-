@@ -158,7 +158,13 @@ export class OracleClient {
       this.captureRateLimit(response)
       if (response.ok) return (await response.json()) as T
       const body: unknown = await response.json().catch(() => null)
-      const error = errorFromResponse(response.status, response.statusText, body, retryAfterMs(response.headers.get('retry-after')) || null)
+      const error = errorFromResponse(
+        response.status,
+        response.statusText,
+        body,
+        retryAfterMs(response.headers.get('retry-after')) || null,
+        response.headers.get('x-api-version'),
+      )
       if (!error.retryable || attempt >= this.maxRetries) throw error
       await this.sleep(computeDelay({ ...DEFAULT_RETRY_POLICY, jitterRatio: this.jitterRatio }, attempt, error.retryAfterMs, this.random))
       attempt += 1
