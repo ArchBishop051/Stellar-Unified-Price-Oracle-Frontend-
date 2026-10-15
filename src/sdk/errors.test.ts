@@ -29,12 +29,15 @@ describe('error taxonomy and retry', () => {
     await expect(new OracleClient({ fetch: f, sleep, maxRetries: 1, random: () => 0 }).getPrices()).rejects.toBeInstanceOf(OracleRateLimitError)
     expect(sleep).toHaveBeenCalledWith(1000)
   })
-  it('reuses idempotency key across retries', async () => {
+  it('reuses a caller-provided idempotency key across retries', async () => {
     const f = vi.fn().mockResolvedValueOnce(res(503)).mockResolvedValueOnce(res(200, {}))
-    await new OracleClient({ fetch: f, sleep: async () => {} }).createAlert({ assetPair: 'X' })
+    const idempotencyKey = 'alert-action-123'
+    await new OracleClient({ fetch: f, sleep: async () => {} }).createAlert(
+      { assetPair: 'X' },
+      { idempotencyKey },
+    )
     const keys = f.mock.calls.map((c) => c[1].headers['Idempotency-Key'])
-    expect(keys[0]).toBeTruthy()
-    expect(keys[0]).toBe(keys[1])
+    expect(keys).toEqual([idempotencyKey, idempotencyKey])
   })
   it('caps delay', () => expect(computeDelay(DEFAULT_RETRY_POLICY, 20, null, () => 1)).toBe(30000))
 })
