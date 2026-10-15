@@ -1,6 +1,6 @@
+import type { PriceData, PriceHistoryResponse } from '../types'
 import { OracleNetworkError, errorFromResponse } from './errors'
 import { computeDelay, newIdempotencyKey, DEFAULT_RETRY_POLICY } from './retry'
-import type { PriceData, PriceHistoryResponse } from '../types'
 
 export interface RateLimitState {
   limit: number | null

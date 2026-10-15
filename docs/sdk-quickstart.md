@@ -66,6 +66,27 @@ const stop = client.subscribe(['XLM-USD', 'BTC-USD'], (price) => {
 
 Call `stop()` when the view or process no longer needs updates.
 
+## Offline local fixtures
+
+When working from a repository checkout, start the local deterministic REST
+fixture server in one terminal:
+
+```bash
+npm run sdk:fixture-server
+```
+
+Then point the SDK at it from another terminal or local frontend:
+
+```ts
+const client = new OracleClient({ baseUrl: 'http://127.0.0.1:4178' })
+const price = await client.getPrice('XLM-USD')
+```
+
+The server provides fixture responses for `getPrice`, `getPrices`, `getHistory`,
+and `createAlert`; it binds to loopback and makes no upstream requests. It does
+not implement WebSocket subscriptions. These values are examples for offline
+development only, not live or production oracle data.
+
 ## Alert conditions
 
 Alerts can combine an absolute threshold with a percentage move. The SDK sends the same shape used by the dashboard:
